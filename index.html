@@ -178,6 +178,7 @@
     <p class="hire__lede">Production, mixing, session bass, or a collaboration. Tell me what you have and what you want it to sound like. Links to rough mixes help.</p>
 
     <form class="booking" action="/api/booking" method="post" novalidate>
+      <div class="received" aria-hidden="true" hidden><b>Received</b><span class="received__d"></span><span>Reply in 48 h · Tampa</span></div>
       <div class="field">
         <label for="f-name">Name</label>
         <input id="f-name" name="name" type="text" autocomplete="name" required>
@@ -209,8 +210,10 @@
 </section>
 </main>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="rough"><feTurbulence baseFrequency=".9" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="1.6"/></filter></svg>
 <footer class="foot">
   <p class="tw"><a href="https://patpadgett.com">patpadgett.com</a> &nbsp;·&nbsp; <a href="https://work.patpadgett.com">work</a> &nbsp;·&nbsp; <a href="https://blog.patpadgett.com">blog</a> &nbsp;·&nbsp; <a href="mailto:pat@patpadgett.com">pat@patpadgett.com</a></p>
+  <button class="leader" type="button" aria-label="End of tape. Rewind to the top">End of side B · 36:06 · rewind ↺</button>
   <p class="tw">© Patrick Padgett 2026 &nbsp;·&nbsp; Korupsi © Ledakan Pemuda 2025</p>
 </footer>
 

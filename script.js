@@ -51,9 +51,30 @@
   }
 
   // booking form: client validation + graceful POST; falls back to mailto if endpoint is not wired yet
+  document.querySelectorAll('.stamp').forEach(function (st) {
+    st.addEventListener('pointerdown', function () {
+      st.style.setProperty('--rot', ((Math.random() * 10) - 9).toFixed(1) + 'deg');
+      st.classList.remove('is-pressed'); void st.offsetWidth; st.classList.add('is-pressed');
+    });
+    st.addEventListener('animationend', function () { st.classList.remove('is-pressed'); });
+  });
+  var leader = document.querySelector('.leader');
+  if (leader) leader.addEventListener('click', function () {
+    var cover = document.querySelector('.reel__cover');
+    if (cover) { cover.classList.add('is-rewinding'); setTimeout(function () { cover.classList.remove('is-rewinding'); }, 1400); }
+    window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    var first = document.querySelector('.reel');
+    if (first) { first.setAttribute('tabindex', '-1'); first.focus({ preventScroll: true }); }
+  });
   var form = document.querySelector('.booking');
   if (form) {
     var status = form.querySelector('.booking__status');
+    var received = form.querySelector('.received');
+    function markReceived() {
+      if (!received) return;
+      var d = new Date(); received.querySelector('.received__d').textContent = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace('Sept','Sep').toUpperCase();
+      received.hidden = false; form.classList.add('is-sent');
+    }
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       status.classList.remove('is-error');
@@ -69,8 +90,8 @@
       fetch(form.action, { method: 'POST', body: data })
         .then(function (r) { if (!r.ok) throw new Error(r.status); return r; })
         .then(function () {
-          status.textContent = 'Got it. I will write back to ' + data.get('email') + '.';
-          form.reset();
+          status.textContent = 'Got it. I will write back to ' + data.get('email') + ' within two days.';
+          markReceived();
         })
         .catch(function () {
           // endpoint not live yet: hand off to email with the fields prefilled
