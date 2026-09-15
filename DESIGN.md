@@ -13,6 +13,13 @@ Three layers that hand the cover off to each other; never more than one owns it.
 - **End of side B.** The footer ends with a leader-tape strip: "End of side B · 36:06 · rewind ↺" (runtime is the true sum of the sheet). Hover runs the tape backwards; click rewinds to the top and spins the reel in reverse for 1.4 s, focus lands on the reel. Reduced motion: no tape run, instant scroll.
 - Repeat-use rule: the three delight touches only respond to the visitor's own action. (Ambient motion on the page — the idle depth cover and the police tape — is the world, not delight, and both pause: depth off-screen, tape on hover/focus.)
 
+## Transport surfaces
+- `.mini` — pinned bottom bar (paper, red top rule) that appears only while a preview plays: ▶/❚❚ 44px round button, "NN Title", m:ss / 0:30, "track sheet ↑". Body gets 70px bottom padding while playing so the last row never hides under it.
+- Status: `.transport__now` is the only `aria-live` region and changes only on track/state; the clock (`.transport__time`, `#mini-time`) is `aria-hidden` and ticks once per second.
+- `.motion` toggle (MOTION: ON/OFF, persisted in localStorage `lp-motion`) sits under KEY CLICKS: off = no tape, no depth cover, no reel spin; audio unaffected. Tape group (`.tape`, `.tape__ribbon`, `.tape__seg`) pauses on hover/focus-within.
+- Ledger: `--row` is 44px; rows, rules and punch marks share it.
+- Cover under `.has-depth` uses `opacity:0`, not `visibility:hidden`, so the `<img>` alt stays in the accessibility tree.
+
 ## Mobile conversion path (≤760px)
 - `.spine__nav` is hidden; the tape-box label carries two rubber-stamp shortcuts instead — `LISTEN / 30 s previews` (also starts the preview) and `WORK WITH ME / booking sheet` — 64px tall, placed between the catalogue block and the meta table.
 - `.reel__note` switches to ink on the paper when the layout stacks.

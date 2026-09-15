@@ -1,12 +1,11 @@
 /* music.patpadgett.com — overdrive.
-   C  Jakarta at night: the cover gets a luminance-derived depth field; cursor/gyro parallax,
-      heat shimmer over the fires, ember sparks under the cursor. WebGL, idle state only.
-   A  The reel rolls: PLAY MASTER spins the cover as a reel with hub + flange, two VU needles
-      breathe from a synthetic tape-hiss source (Web Audio, silent — analyser only), the
-      playing row gets a grease-pencil tick that walks the sheet on each track's real duration.
-   B  The sheet is the instrument: hover slides a carriage; click strikes the title glyph by
-      glyph; optional beep (opt-in toggle, off by default); a struck row opens the player.
-   Every layer degrades to the existing page. Reduced motion: A/C off, B keeps the tick only. */
+   C  Jakarta at night: luminance-derived depth field on the cover; cursor/gyro parallax, heat
+      shimmer, embers. WebGL, idle state only. Off under reduced motion or the motion toggle.
+   A  Real transport: one <audio> plays 30-second previews. Reel spin, VU needles (analyser on
+      the element), ▶/✓ marks, status line and the pinned mini-transport all derive from it.
+   B  The sheet is the instrument: hover carriage, glyph strike on click, optional key clicks;
+      a struck row previews that track (again to pause).
+   Every layer degrades to the plain page. */
 (() => {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const cover = document.querySelector('.reel__cover');
@@ -79,7 +78,7 @@
     new IntersectionObserver(([e]) => { if (e.isIntersecting && C.enabled) start(); else stop(); }).observe(cover);
     addEventListener('visibilitychange', () => { if (document.visibilityState !== 'visible') stop(); else if (C.enabled) start(); });
     cv.addEventListener('webglcontextlost', e => { e.preventDefault(); C.disable(); });
-    const mount = () => { size(); if (!upload()) return; cover.appendChild(cv); cover.classList.add('has-depth'); C.enabled = true; start(); };
+    const mount = () => { size(); if (!upload()) return; cover.appendChild(cv); if (document.documentElement.classList.contains('motion-off')) { C.enabled = false; return; } cover.classList.add('has-depth'); C.enabled = true; start(); };
     C = { enabled: false, cv, mount, enable() { if (!cover.contains(cv)) mount(); else { C.enabled = true; cover.classList.add('has-depth'); start(); } }, disable() { C.enabled = false; stop(); cover.classList.remove('has-depth'); } };
     let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (C.enabled) size(); }, 120); });
     (img.complete && img.naturalWidth ? Promise.resolve() : new Promise(r => img.addEventListener('load', r, { once: true }))).then(mount);
@@ -95,7 +94,8 @@
   const tNow = transport && transport.querySelector('.transport__now');
   const tTime = transport && transport.querySelector('.transport__time');
   const titles = rows.map(li => li.querySelector('.tracks__t').textContent);
-  const A = { idx: -1, raf: 0, ctx: null, an: null, data: null, vu: null, wired: false, done: new Set() };
+  const A = { idx: -1, raf: 0, ctx: null, an: null, data: null, vu: null, wired: false, done: new Set(), lastSec: -1 };
+  const mini = document.getElementById('mini'), miniBtn = document.getElementById('mini-btn'), miniNow = document.getElementById('mini-now'), miniTime = document.getElementById('mini-time');
   const src = i => 'assets/audio/' + String(i + 1).padStart(2, '0') + '.mp3';
   const fmt = t => Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
 
@@ -135,7 +135,7 @@
     if (A.an) { A.an.getByteTimeDomainData(A.data); let s = 0; for (let i = 0; i < A.data.length; i++) { const v = (A.data[i] - 128) / 128; s += v * v; } lvl = Math.min(1, Math.sqrt(s / A.data.length) * 3.2); }
     vuL += (lvl - vuL) * .25; vuR += ((lvl * .95) - vuR) * .22;
     if (!reduce && A.vu) { const cs = A.vu.querySelectorAll('canvas'); drawNeedle(cs[0], vuL); drawNeedle(cs[1], vuR); }
-    if (tTime) tTime.textContent = fmt(audio.currentTime) + ' / 0:30';
+    const sec = Math.floor(audio.currentTime); if (sec !== A.lastSec) { A.lastSec = sec; const tt = fmt(audio.currentTime) + ' / 0:30'; if (tTime) tTime.textContent = tt; if (miniTime) miniTime.textContent = tt; }
     A.raf = requestAnimationFrame(frame);
   }
   function mark() {
@@ -148,8 +148,9 @@
     stampText.innerHTML = playing ? 'PAUSE<br>MASTER' : 'PLAY<br>MASTER';
     cover.classList.toggle('is-rolling', playing && !reduce); document.body.classList.toggle('tape-rolling', playing);
     if (playing) { if (C) C.disable(); if (!A.vu && !reduce) A.vu = buildVU(); if (!A.raf) A.raf = requestAnimationFrame(frame); }
-    else if (C && !reduce && !document.body.classList.contains('tape-rolling')) C.enable();
+    else if (C && !reduce && !document.documentElement.classList.contains('motion-off')) C.enable();
     if (tNow) tNow.textContent = A.idx < 0 ? '30-second previews · press a track or the stamp' : (playing ? '▶ ' : '❚❚ ') + String(A.idx + 1).padStart(2, '0') + ' ' + titles[A.idx] + ' · preview';
+    if (mini) { mini.classList.toggle('is-on', playing); if (miniNow && A.idx >= 0) miniNow.textContent = String(A.idx + 1).padStart(2, '0') + ' ' + titles[A.idx]; if (miniBtn) { miniBtn.textContent = playing ? '❚❚' : '▶'; miniBtn.setAttribute('aria-label', playing ? 'Pause preview' : 'Resume preview'); } }
   }
   function load(i) {
     A.idx = i; audio.preload = 'auto'; audio.src = src(i); audio.load(); mark();
@@ -166,6 +167,15 @@
   audio.addEventListener('timeupdate', () => { if (!audio.paused && audio.duration && audio.currentTime >= audio.duration - 0.05) { audio.pause(); audio.dispatchEvent(new Event('ended')); } });
   audio.addEventListener('error', () => { if (tNow) tNow.textContent = 'Preview ' + String(A.idx + 1).padStart(2, '0') + ' is unavailable — full album on Bandcamp below.'; });
   stamp.addEventListener('click', () => { if (audio.paused) play(); else audio.pause(); });
+  if (miniBtn) miniBtn.addEventListener('click', () => { if (audio.paused) play(); else audio.pause(); });
+  // motion toggle (persisted) — ambient motion off: tape, depth cover, reel spin
+  const motionKey = 'lp-motion';
+  const setMotion = on => { document.documentElement.classList.toggle('motion-off', !on); try { localStorage.setItem(motionKey, on ? 'on' : 'off'); } catch (e) {} if (C) { if (on && !reduce && audio.paused) C.enable(); else C.disable(); } mtog.setAttribute('aria-pressed', String(on)); mtog.textContent = 'MOTION: ' + (on ? 'ON' : 'OFF'); };
+  const mtog = document.createElement('button'); mtog.type = 'button'; mtog.className = 'motion tw';
+  sheet.querySelector('.sheet__head').appendChild(mtog);
+  let motionOn = true; try { motionOn = localStorage.getItem(motionKey) !== 'off'; } catch (e) {}
+  mtog.addEventListener('click', () => setMotion(document.documentElement.classList.contains('motion-off')));
+  queueMicrotask(() => setMotion(motionOn));
   addEventListener('keydown', e => { if (e.key === ' ' && !e.target.closest('input,textarea,button,a,select,[role=button],iframe')) { e.preventDefault(); if (audio.paused) play(); else audio.pause(); } });
   const hub = document.createElement('div'); hub.className = 'reel__hub'; hub.setAttribute('aria-hidden', 'true');
   hub.innerHTML = '<span></span><span></span><span></span>'; cover.appendChild(hub);

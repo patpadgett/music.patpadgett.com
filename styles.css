@@ -31,7 +31,7 @@
   --f-pencil:"Permanent Marker",cursive;
 
   --gutter:clamp(18px,4vw,56px);
-  --row:38px;
+  --row:44px;
   --shadow-paper:0 2px 3px rgba(0,0,0,.35),0 14px 28px -10px rgba(0,0,0,.55);
   --ease:cubic-bezier(.2,.8,.2,1);
 }
@@ -350,8 +350,8 @@ p{margin:0}
 .reel__cover{position:relative;overflow:hidden}
 .reel__cover .depth{position:absolute;top:0;left:0;width:100%;display:none;pointer-events:none}
 .reel__cover.has-depth .depth{display:block}
-.reel__cover.has-depth img{visibility:hidden}
-.reel__cover.is-rolling .depth{display:none}.reel__cover.is-rolling img{visibility:visible}
+.reel__cover.has-depth img{opacity:0}
+.reel__cover.is-rolling .depth{display:none}.reel__cover.is-rolling img{opacity:1}
 /* A: the reel */
 .reel__cover.is-rolling{border-radius:50%;margin-top:14px;box-shadow:0 0 0 6px var(--box-2),0 0 0 8px var(--board-line),var(--shadow-paper);transition:border-radius .6s var(--ease),box-shadow .6s var(--ease)}
 .reel__cover.is-rolling img{animation:reelSpin 3.4s linear infinite;border-radius:50%}
@@ -406,7 +406,7 @@ p{margin:0}
 .leader:hover{opacity:1}.leader:focus-visible{opacity:1;outline:2px solid var(--paper);outline-offset:4px}
 .leader:hover::before,.leader:hover::after{animation:leaderRun .9s linear infinite reverse}
 @keyframes leaderRun{to{background-position:26px 0}}
-.reel__cover.is-rewinding img,.reel__cover.is-rewinding .reel__hub{animation-direction:reverse;animation-duration:.6s}
+.reel__cover.is-rewinding img{animation:reelSpin .6s linear infinite reverse;border-radius:0}
 @media (prefers-reduced-motion:reduce){.leader:hover::before,.leader:hover::after{animation:none}}
 
 /* ---------- critique fix round ---------- */
@@ -419,7 +419,7 @@ p{margin:0}
 #preview{display:none}.sheet__player .player{grid-column:1/-1}.sheet__player{grid-template-areas:none}
 .stamp[aria-pressed="true"] .stamp__ring{border-style:solid}
 /* rows: 44px min, state via aria-pressed too */
-.tracks li{min-height:44px;align-items:center}
+.tracks li{align-items:center}
 /* mobile shortcut stamps */
 .reel__go{display:none}
 @media (max-width:760px){
@@ -448,5 +448,23 @@ p{margin:0}
 /* outlet caption contrast */
 .outlet--primary > small.tw{color:#fff;opacity:1}
 /* police tape: pause on hover/focus */
-.tape:hover .tape__ribbon,.tape:focus-within .tape__ribbon{animation-play-state:paused}
-#tracks,.sheet,#hire,#notes{scroll-margin-top:72px}
+.tape:hover,.tape:hover .tape__ribbon,.tape:hover .tape__seg,.tape:focus-within,.tape:focus-within .tape__ribbon,.tape:focus-within .tape__seg{animation-play-state:paused}
+html.motion-off .tape,html.motion-off .tape__ribbon,html.motion-off .tape__seg,html.motion-off .reel__cover img,html.motion-off .reel__hub{animation:none !important}
+html.motion-off .depth{display:none !important}html.motion-off .reel__cover.has-depth img{opacity:1}
+#tracks,#sheet,#hire,#story,#listen{scroll-margin-top:72px}
+
+/* pinned mini-transport while a preview plays */
+.mini{position:fixed;left:0;right:0;bottom:0;z-index:40;display:none;align-items:center;gap:14px;padding:10px max(14px,env(safe-area-inset-left)) max(10px,env(safe-area-inset-bottom));background:var(--paper);color:var(--ink);border-top:3px solid var(--red);box-shadow:0 -6px 24px rgba(0,0,0,.35);font-family:var(--f-tw);font-size:.9rem;letter-spacing:.04em}
+.mini.is-on{display:flex}
+.mini__btn{flex:0 0 auto;width:44px;height:44px;border-radius:50%;border:3px double var(--red);background:none;color:var(--red);font-size:1rem;cursor:pointer;display:grid;place-items:center}
+.mini__btn:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+.mini__now{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mini__time{flex:0 0 auto;font-variant-numeric:tabular-nums;color:var(--red)}
+.mini__up{flex:0 0 auto;color:var(--ink-2);text-decoration:none;font-size:.8rem;padding:6px 0}
+.mini__up:hover,.mini__up:focus-visible{color:var(--red)}
+body.tape-rolling{padding-bottom:70px}
+.keys{margin-right:0}
+.motion{position:absolute;right:18px;top:44px;margin:0;font-size:.72rem;letter-spacing:.1em;color:var(--ink-2);background:none;border:1px solid var(--paper-line);padding:4px 8px;cursor:pointer}
+.motion[aria-pressed="false"]{color:var(--red);border-color:var(--red)}
+@media (max-width:560px){.motion{position:static;margin-top:4px;margin-left:8px}}
+.stamp__sub{position:absolute;left:50%;bottom:14%;transform:translateX(-50%);font-size:.55rem;letter-spacing:.08em;color:currentColor;opacity:.85;white-space:nowrap}

@@ -1,4 +1,4 @@
-/* music.patpadgett.com — small behaviours, no dependencies */
+/* music.patpadgett.com — page behaviours, no dependencies. Preview transport lives in overdrive.js. */
 (function () {
   'use strict';
 
@@ -7,7 +7,7 @@
     li.style.setProperty('--i', i);
   });
 
-  // PLAY MASTER stamp: reveal the Bandcamp player, load iframe lazily
+  // Full-album disclosure: reveal the Bandcamp player, load iframe lazily
   var bcToggle = document.getElementById('bc-toggle');
   var player = document.getElementById('bc-player');
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -59,6 +59,7 @@
       if (!received) return;
       var d = new Date(); received.querySelector('.received__d').textContent = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace('Sept','Sep').toUpperCase();
       received.hidden = false; form.classList.add('is-sent');
+      form.querySelectorAll('input,textarea').forEach(function (el) { el.disabled = true; });
     }
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -68,6 +69,7 @@
       var firstBad = null, n = 0;
       ['f-name', 'f-email', 'f-msg'].forEach(function (id) {
         var el = document.getElementById(id), err = document.getElementById(id + '-err'); if (!el || !err) return;
+        if (el.value && !el.value.trim()) el.value = '';
         var bad = !el.checkValidity();
         el.setAttribute('aria-invalid', bad ? 'true' : 'false'); err.hidden = !bad; err.textContent = bad ? (el.validity.typeMismatch ? 'That does not look like an email address.' : msgs[id]) : '';
         if (bad) { n++; if (!firstBad) firstBad = el; }
