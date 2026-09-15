@@ -47,3 +47,8 @@ Three layers that hand the cover off to each other; never more than one owns it.
 - Mini bar title carries "· preview".
 - Booking draft (name, email, message, type) is kept in `sessionStorage` (`lp-booking-draft`) on input, restored on load, cleared on success.
 - Utility pills ≥32px tall.
+
+## Owner decisions (round 6 follow-up)
+- Session notes text is Patrick's own — leave as written.
+- Mobile hero is **album-first**: one PLAY stamp (full card width, "30-second previews") is the only red action; "Work with me → booking sheet" is a quiet underlined text link beneath it. No second stamp.
+- Fix: at 390px the two-stamp row overflowed the label card by 10px; the single-column stack removes the overflow at every width (checked 320–760).
