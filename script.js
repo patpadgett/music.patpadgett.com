@@ -55,9 +55,19 @@
   if (form) {
     var status = form.querySelector('.booking__status');
     var received = form.querySelector('.received');
+    // draft: survive an interruption within the session; cleared on success
+    var DKEY = 'lp-booking-draft';
+    try {
+      var saved = JSON.parse(sessionStorage.getItem(DKEY) || 'null');
+      if (saved) { ['name', 'email', 'message'].forEach(function (k) { var el = form.elements[k]; if (el && saved[k]) el.value = saved[k]; }); if (saved.type) { var rb = form.querySelector('input[name=type][value="' + saved.type + '"]'); if (rb) rb.checked = true; } }
+    } catch (e) {}
+    form.addEventListener('input', function () {
+      try { var fd = new FormData(form); sessionStorage.setItem(DKEY, JSON.stringify({ name: fd.get('name'), email: fd.get('email'), message: fd.get('message'), type: fd.get('type') })); } catch (e) {}
+    });
     function markReceived() {
       if (!received) return;
       var d = new Date(); received.querySelector('.received__d').textContent = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace('Sept','Sep').toUpperCase();
+      try { sessionStorage.removeItem(DKEY); } catch (e) {}
       received.hidden = false; form.classList.add('is-sent');
       form.querySelectorAll('input,textarea').forEach(function (el) { el.disabled = true; });
     }

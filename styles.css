@@ -431,11 +431,12 @@ html.motion-off .reel__cover.is-rewinding img{animation:none}
 /* mobile shortcut stamps */
 .reel__go{display:none}
 @media (max-width:760px){
-  .reel__go{display:flex;gap:14px;margin:14px 0 4px;order:-1}
-  .reel__label{grid-template-areas:'k' 'title' 'by' 'cat' 'go' 'meta' 'note' !important}.reel__go{grid-area:go}.reel__by{grid-area:by}
+  .reel__go{display:flex;gap:14px;margin:4px 0 14px;order:-1}
+  .reel__label{grid-template-areas:'k' 'title' 'by' 'go' 'cat' 'meta' 'note' !important}.reel__go{grid-area:go}.reel__by{grid-area:by}
   .go{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:64px;padding:10px 14px;border:3px double var(--red);border-radius:6px;color:var(--red);text-decoration:none;font-family:var(--f-tw);font-weight:700;letter-spacing:.12em;line-height:1.1;font-size:1.05rem;transform:rotate(-1.5deg)}
   .go--book{transform:rotate(1.2deg)}
-  .go small{display:block;font-weight:400;font-size:.75rem;letter-spacing:.04em;color:var(--ink-2);margin-top:4px}
+  .go small{display:block;font-weight:400;font-size:.75rem;letter-spacing:.04em;color:var(--ink-2);margin-top:4px;white-space:nowrap}
+  .go{align-items:flex-start}
   .go:focus-visible{outline:2px solid var(--red);outline-offset:3px}
 }
 /* booking: field errors + readable confirmation */
@@ -500,3 +501,14 @@ body.tape-rolling,body.mini-open{padding-bottom:70px}
 .linkish{background:none;border:0;padding:0;font:inherit;color:var(--red);text-decoration:underline;cursor:pointer}
 #mini-btn{width:44px;height:44px}
 #outlets{scroll-margin-top:72px}
+
+@media (max-width:360px){
+  .go{font-size:.92rem;padding:10px 10px;letter-spacing:.08em}.go small{font-size:.66rem;white-space:normal}
+  .tracks li{grid-template-columns:30px 1fr 40px !important;gap:6px !important}
+  .tracks__note{display:none}
+  .tracks__t{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.2;overflow-wrap:normal;word-break:keep-all}
+  .reel__cat{font-size:.72rem}
+}
+/* P3: utility pills 32px hit area */
+.keys,.motion{min-height:32px}
+.tracks__t .w{white-space:nowrap;display:inline-block}

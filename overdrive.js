@@ -150,7 +150,7 @@
     if (playing) { if (C) C.disable(); if (!A.vu && !reduce) A.vu = buildVU(); if (!A.raf) A.raf = requestAnimationFrame(frame); }
     else if (C && !reduce && !document.documentElement.classList.contains('motion-off')) C.enable();
     if (tNow) tNow.textContent = A.idx < 0 ? '30-second previews · press a track or the stamp' : (playing ? '▶ ' : '❚❚ ') + String(A.idx + 1).padStart(2, '0') + ' ' + titles[A.idx] + ' · preview';
-    if (mini) { mini.classList.toggle('is-on', A.idx >= 0 && !A.dismissed); document.body.classList.toggle('mini-open', A.idx >= 0 && !A.dismissed); mini.classList.toggle('is-paused', !playing); if (miniNow && A.idx >= 0) miniNow.textContent = String(A.idx + 1).padStart(2, '0') + ' ' + titles[A.idx]; if (miniBtn) { miniBtn.textContent = playing ? '❚❚' : '▶'; miniBtn.setAttribute('aria-label', playing ? 'Pause preview' : 'Resume preview'); } }
+    if (mini) { mini.classList.toggle('is-on', A.idx >= 0 && !A.dismissed); document.body.classList.toggle('mini-open', A.idx >= 0 && !A.dismissed); mini.classList.toggle('is-paused', !playing); if (miniNow && A.idx >= 0) miniNow.textContent = String(A.idx + 1).padStart(2, '0') + ' ' + titles[A.idx] + ' · preview'; if (miniBtn) { miniBtn.textContent = playing ? '❚❚' : '▶'; miniBtn.setAttribute('aria-label', playing ? 'Pause preview' : 'Resume preview'); } }
   }
   function load(i) {
     A.idx = i; audio.preload = 'auto'; audio.src = src(i); audio.load(); mark();
@@ -200,7 +200,7 @@
     li.tabIndex = 0; li.setAttribute('role', 'button'); li.setAttribute('aria-pressed', 'false');
     li.setAttribute('aria-label', 'Preview track ' + (i + 1) + ', ' + titles[i] + ', 30 seconds');
     const t = li.querySelector('.tracks__t'); const text = t.textContent;
-    t.innerHTML = [...text].map(ch => `<span class="g">${ch === ' ' ? '&nbsp;' : ch}</span>`).join('');
+    t.innerHTML = text.split(' ').map(word => '<span class="w">' + [...word].map(ch => `<span class="g">${ch}</span>`).join('') + '</span>').join(' ');
     li.addEventListener('pointerenter', () => { if (reduce) return; const r = li.getBoundingClientRect(), pr = li.parentElement.getBoundingClientRect(); carriage.style.top = (r.top - pr.top) + 'px'; carriage.style.height = r.height + 'px'; carriage.classList.add('is-on'); });
     li.addEventListener('pointermove', e => { if (reduce) return; const pr = li.parentElement.getBoundingClientRect(); carriage.style.setProperty('--x', Math.max(30, e.clientX - pr.left) + 'px'); });
     li.addEventListener('pointerleave', () => carriage.classList.remove('is-on'));

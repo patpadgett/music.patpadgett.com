@@ -40,3 +40,10 @@ Three layers that hand the cover off to each other; never more than one owns it.
 - Mobile `.reel__cat` is a flowing band (inline items with trailing · separators, LP–001 inline at 1.5rem); desktop keeps the stacked box. `.reel__by` precedes `.reel__cat` in DOM as well as visually.
 - Failed booking POST: "Could not send — nothing was lost. Try again or send it by email." (retry button + mailto); fields kept, submit re-enabled.
 - `#mini-btn` 44px; `#outlets` scroll-margin.
+
+## Round-6 refinements
+- Mobile label order: title → credit → PLAY / WORK WITH ME → catalogue band → metadata (stamps before the catalogue so both actions sit in a 320×700 first screen).
+- ≤360px: rows drop the note column, 30/1fr/40 grid, titles wrap by word (glyph spans are grouped per word in `.w{white-space:nowrap}` so the strike effect can't split a word).
+- Mini bar title carries "· preview".
+- Booking draft (name, email, message, type) is kept in `sessionStorage` (`lp-booking-draft`) on input, restored on load, cleared on success.
+- Utility pills ≥32px tall.
