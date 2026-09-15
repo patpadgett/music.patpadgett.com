@@ -14,10 +14,14 @@ Three layers that hand the cover off to each other; never more than one owns it.
 - Repeat-use rule: the three delight touches only respond to the visitor's own action. (Ambient motion on the page — the idle depth cover and the police tape — is the world, not delight, and both pause: depth off-screen, tape on hover/focus.)
 
 ## Transport surfaces
+- `.mini` ≤560px: two lines — full title on top, then ▶/❚❚, time pushed right, ↑ and × (44px). Body padding 104px while open.
+- `.reel__by` (mobile only): "Produced, mixed & written by Patrick Padgett" directly under the title, before the catalogue box — the producer credit precedes WORK WITH ME.
+- Listening language: nav "Stream elsewhere" (outlets), mobile stamp "PLAY / 30-second previews", PLAY MASTER stamp (aria-label says previews), "Full album ▾" for Bandcamp.
 - `.mini` — pinned bottom bar (paper, red top rule) shown whenever a preview is loaded, playing or paused (`.is-paused` tints it): ▶/❚❚ 44px round button, "NN Title" (gets the width), m:ss / 0:30, ↑ back to the sheet, × closes (pauses, hides, returns focus to the stamp). Starting any track re-shows it. Body gets 70px bottom padding while it is open.
 - Handoff: opening the Bandcamp disclosure pauses the preview — one transport owns sound at a time.
 - Rewind (footer leader): reverse-spins the plain cover for 1.4 s with the depth canvas suspended; no spin under reduced motion or MOTION: OFF. Stamp press animation is also off under reduced motion.
 - Status: `.transport__now` is the transport's only `aria-live` region (the booking status is the other on the page) and changes only on track/state; the clock (`.transport__time`, `#mini-time`) is `aria-hidden` and ticks once per second.
+- `.util` groups KEY CLICKS then AMBIENT MOTION (renamed for honest scope: it governs tape, depth cover, reel spin — not the glyph strike or carriage). `aria-pressed` reflects *effective* motion (false under reduced motion). Stamp transform transition is 0 under reduced motion.
 - `.util` groups KEY CLICKS then MOTION (DOM order = visual order; compact pills side by side on mobile). `.motion` (persisted in localStorage `lp-motion`) reads "OFF (system)" under reduced motion: off = no tape, no depth cover, no reel spin; audio unaffected. Tape group (`.tape`, `.tape__ribbon`, `.tape__seg`) pauses on hover/focus-within.
 - Ledger: `--row` is 44px; rows, rules and punch marks share it. `.tracks__hint` above the rows carries the instruction ("Tap a track · 30-second previews · press again to pause") — the stamp carries no micro-text.
 - Cover under `.has-depth` uses `opacity:0`, not `visibility:hidden`, so the `<img>` alt stays in the accessibility tree.

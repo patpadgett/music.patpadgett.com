@@ -160,7 +160,7 @@
     if (i !== undefined && i !== A.idx) load(i);
     else if (A.idx < 0) load(0);
     wireAnalyser(); if (A.ctx && A.ctx.state === 'suspended') A.ctx.resume();
-    const p = audio.play(); if (p && p.catch) p.catch(() => { if (tNow) tNow.textContent = 'Preview could not start — tap again, or use the Bandcamp player below.'; setStamp(); });
+    const p = audio.play(); if (p && p.catch) p.catch(() => { setStamp(); if (tNow) tNow.textContent = 'Preview could not start — tap again, or use the Bandcamp player below.'; });
   }
   audio.addEventListener('play', () => { setStamp(); mark(); });
   audio.addEventListener('pause', () => { if (A.finished) { A.finished = false; return; } setStamp(); mark(); });
@@ -170,13 +170,13 @@
   stamp.addEventListener('click', () => { if (audio.paused) play(); else audio.pause(); });
   if (miniBtn) miniBtn.addEventListener('click', () => { if (audio.paused) play(); else audio.pause(); });
   const miniX = document.getElementById('mini-x');
-  if (miniX) miniX.addEventListener('click', () => { audio.pause(); A.dismissed = true; mini.classList.remove('is-on'); document.body.classList.remove('tape-rolling'); stamp.focus(); });
+  if (miniX) miniX.addEventListener('click', () => { audio.pause(); A.dismissed = true; mini.classList.remove('is-on'); document.body.classList.remove('tape-rolling', 'mini-open'); stamp.focus(); });
   // handoff: opening the full Bandcamp player pauses the preview
   const bcT = document.getElementById('bc-toggle'); if (bcT) bcT.addEventListener('click', () => { if (!audio.paused) audio.pause(); }, true);
   const util = document.createElement('div'); util.className = 'util'; sheet.querySelector('.sheet__head').appendChild(util);
   // motion toggle (persisted) — ambient motion off: tape, depth cover, reel spin
   const motionKey = 'lp-motion';
-  const setMotion = on => { document.documentElement.classList.toggle('motion-off', !on); try { localStorage.setItem(motionKey, on ? 'on' : 'off'); } catch (e) {} if (C) { if (on && !reduce && audio.paused) C.enable(); else C.disable(); } mtog.setAttribute('aria-pressed', String(on)); mtog.textContent = 'MOTION: ' + (on ? (reduce ? 'OFF (system)' : 'ON') : 'OFF'); };
+  const setMotion = on => { document.documentElement.classList.toggle('motion-off', !on); try { localStorage.setItem(motionKey, on ? 'on' : 'off'); } catch (e) {} if (C) { if (on && !reduce && audio.paused) C.enable(); else C.disable(); } const eff = on && !reduce; mtog.setAttribute('aria-pressed', String(eff)); mtog.textContent = 'AMBIENT MOTION: ' + (eff ? 'ON' : (reduce ? 'OFF (system)' : 'OFF')); };
   const mtog = document.createElement('button'); mtog.type = 'button'; mtog.className = 'motion tw';
   util.appendChild(mtog);
   let motionOn = true; try { motionOn = localStorage.getItem(motionKey) !== 'off'; } catch (e) {}
