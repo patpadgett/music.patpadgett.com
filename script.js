@@ -19,7 +19,7 @@
         player.hidden = false;
         stamp.setAttribute('aria-expanded', 'true');
         stamp.querySelector('.stamp__text').innerHTML = 'HIDE<br>PLAYER';
-        player.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        if (player.getBoundingClientRect().bottom > innerHeight) player.scrollIntoView({ behavior: 'smooth', block: 'end' });
       } else {
         player.hidden = true;
         stamp.setAttribute('aria-expanded', 'false');
@@ -41,7 +41,7 @@
   var links = [].slice.call(document.querySelectorAll('.spine__nav a'));
   if ('IntersectionObserver' in window && links.length) {
     var map = {};
-    links.forEach(function (a) { var el = document.querySelector(a.getAttribute('href')); if (el) map[el.id] = a; });
+    links.forEach(function (a) { var h = a.getAttribute('href'); if (!h || h.charAt(0) !== '#') return; var el = document.querySelector(h); if (el) map[el.id] = a; });
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {
         if (en.isIntersecting) { links.forEach(function (a) { a.classList.remove('is-active'); }); map[en.target.id].classList.add('is-active'); }
