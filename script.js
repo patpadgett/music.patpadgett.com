@@ -92,8 +92,9 @@
           // endpoint not live yet: hand off to email with the fields prefilled
           var body = 'Name: ' + data.get('name') + '\nEmail: ' + data.get('email') + '\nType: ' + data.get('type') + '\n\n' + data.get('message');
           form.dataset.busy = ''; if (btn) btn.disabled = false;
-          status.textContent = 'Opening your mail app instead…';
-          window.location.href = 'mailto:pat@patpadgett.com?subject=' + encodeURIComponent('Booking: ' + data.get('type')) + '&body=' + encodeURIComponent(body);
+          var mail = 'mailto:pat@patpadgett.com?subject=' + encodeURIComponent('Booking: ' + data.get('type')) + '&body=' + encodeURIComponent(body);
+          status.classList.add('is-error');
+          status.innerHTML = 'Could not send — nothing was lost. <button type="submit" class="linkish">Try again</button> or <a href="' + mail + '">send it by email</a>.';
         });
     });
   }

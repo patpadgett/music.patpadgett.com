@@ -21,15 +21,22 @@ Three layers that hand the cover off to each other; never more than one owns it.
 - Handoff: opening the Bandcamp disclosure pauses the preview — one transport owns sound at a time.
 - Rewind (footer leader): reverse-spins the plain cover for 1.4 s with the depth canvas suspended; no spin under reduced motion or MOTION: OFF. Stamp press animation is also off under reduced motion.
 - Status: `.transport__now` is the transport's only `aria-live` region (the booking status is the other on the page) and changes only on track/state; the clock (`.transport__time`, `#mini-time`) is `aria-hidden` and ticks once per second.
-- `.util` groups KEY CLICKS then AMBIENT MOTION (renamed for honest scope: it governs tape, depth cover, reel spin — not the glyph strike or carriage). `aria-pressed` reflects *effective* motion (false under reduced motion). Stamp transform transition is 0 under reduced motion.
+- `.util` groups KEY CLICKS then MOTION (aria-label: "Ambient motion (tape, cover, reel)") (renamed for honest scope: it governs tape, depth cover, reel spin — not the glyph strike or carriage). `aria-pressed` reflects *effective* motion (false under reduced motion). Stamp transform transition is 0 under reduced motion.
 - `.util` groups KEY CLICKS then MOTION (DOM order = visual order; compact pills side by side on mobile). `.motion` (persisted in localStorage `lp-motion`) reads "OFF (system)" under reduced motion: off = no tape, no depth cover, no reel spin; audio unaffected. Tape group (`.tape`, `.tape__ribbon`, `.tape__seg`) pauses on hover/focus-within.
 - Ledger: `--row` is 44px; rows, rules and punch marks share it. `.tracks__hint` above the rows carries the instruction ("Tap a track · 30-second previews · press again to pause") — the stamp carries no micro-text.
 - Cover under `.has-depth` uses `opacity:0`, not `visibility:hidden`, so the `<img>` alt stays in the accessibility tree.
 
 ## Mobile conversion path (≤760px)
-- `.spine__nav` is hidden; the tape-box label carries two rubber-stamp shortcuts instead — `LISTEN / 30 s previews` (also starts the preview) and `WORK WITH ME / booking sheet` — 64px tall, placed between the catalogue block and the meta table.
+- `.spine__nav` is hidden; the tape-box label carries two rubber-stamp shortcuts instead — `PLAY / 30-second previews` (also starts the preview) and `WORK WITH ME / booking sheet` — 64px tall, placed between the catalogue block and the meta table.
 - `.reel__note` switches to ink on the paper when the layout stacks.
 
 ## Booking hardening
 - Per-field errors (`.field__err`, `aria-describedby`, `aria-invalid`), specific copy; status line counts fields.
 - Submit disabled while pending and after success; confirmation lives in `.booking__done` outside the faded block and receives focus. "I reply within 48 hours." is in the lede, before the risk.
+
+## Round-5 refinements
+- `.util` (KEY CLICKS · MOTION) lives in DOM *after* the track rows (tab order: tracks first); on desktop it is absolutely positioned in the sheet head, on ≤560px it wraps in a row below the list. Fixes 320px overflow.
+- Row states: `.is-playing` = loaded track; `.is-playing.is-paused` shows ❚❚ instead of ▶.
+- Mobile `.reel__cat` is a flowing band (inline items with trailing · separators, LP–001 inline at 1.5rem); desktop keeps the stacked box. `.reel__by` precedes `.reel__cat` in DOM as well as visually.
+- Failed booking POST: "Could not send — nothing was lost. Try again or send it by email." (retry button + mailto); fields kept, submit re-enabled.
+- `#mini-btn` 44px; `#outlets` scroll-margin.

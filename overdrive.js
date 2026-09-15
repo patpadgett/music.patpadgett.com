@@ -139,7 +139,7 @@
     A.raf = requestAnimationFrame(frame);
   }
   function mark() {
-    rows.forEach((li, k) => { li.classList.toggle('is-playing', k === A.idx); li.classList.toggle('is-ticked', A.done.has(k) && k !== A.idx); li.setAttribute('aria-pressed', String(k === A.idx && !audio.paused)); });
+    rows.forEach((li, k) => { li.classList.toggle('is-playing', k === A.idx); li.classList.toggle('is-paused', k === A.idx && audio.paused); li.classList.toggle('is-ticked', A.done.has(k) && k !== A.idx); li.setAttribute('aria-pressed', String(k === A.idx && !audio.paused)); });
   }
   function setStamp() {
     const playing = !audio.paused;
@@ -173,10 +173,10 @@
   if (miniX) miniX.addEventListener('click', () => { audio.pause(); A.dismissed = true; mini.classList.remove('is-on'); document.body.classList.remove('tape-rolling', 'mini-open'); stamp.focus(); });
   // handoff: opening the full Bandcamp player pauses the preview
   const bcT = document.getElementById('bc-toggle'); if (bcT) bcT.addEventListener('click', () => { if (!audio.paused) audio.pause(); }, true);
-  const util = document.createElement('div'); util.className = 'util'; sheet.querySelector('.sheet__head').appendChild(util);
+  const util = document.createElement('div'); util.className = 'util'; sheet.querySelector('.tracks').insertAdjacentElement('afterend', util);
   // motion toggle (persisted) — ambient motion off: tape, depth cover, reel spin
   const motionKey = 'lp-motion';
-  const setMotion = on => { document.documentElement.classList.toggle('motion-off', !on); try { localStorage.setItem(motionKey, on ? 'on' : 'off'); } catch (e) {} if (C) { if (on && !reduce && audio.paused) C.enable(); else C.disable(); } const eff = on && !reduce; mtog.setAttribute('aria-pressed', String(eff)); mtog.textContent = 'AMBIENT MOTION: ' + (eff ? 'ON' : (reduce ? 'OFF (system)' : 'OFF')); };
+  const setMotion = on => { document.documentElement.classList.toggle('motion-off', !on); try { localStorage.setItem(motionKey, on ? 'on' : 'off'); } catch (e) {} if (C) { if (on && !reduce && audio.paused) C.enable(); else C.disable(); } const eff = on && !reduce; mtog.setAttribute('aria-pressed', String(eff)); mtog.textContent = 'MOTION: ' + (eff ? 'ON' : (reduce ? 'OFF (system)' : 'OFF')); mtog.setAttribute('aria-label', 'Ambient motion (tape, cover, reel): ' + (eff ? 'on' : 'off')); };
   const mtog = document.createElement('button'); mtog.type = 'button'; mtog.className = 'motion tw';
   util.appendChild(mtog);
   let motionOn = true; try { motionOn = localStorage.getItem(motionKey) !== 'off'; } catch (e) {}
