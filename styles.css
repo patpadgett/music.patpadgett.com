@@ -437,9 +437,11 @@ p{margin:0}
 .hire__promise{font-weight:700;color:var(--ink)}
 /* small targets → 24px min */
 .reel__cat a,.scene__tag a,.booking__alt a,.foot > p a{display:inline-block;padding:5px 0;line-height:14px}
+.spine__name{display:inline-flex;align-items:center;min-height:24px}
 .booking fieldset label{min-height:24px;display:inline-flex;align-items:center;gap:6px}
-.booking input[type=radio]{width:20px;height:20px;margin:2px}
+.booking input[type=radio]{width:22px;height:22px;margin:1px}
 /* outlet caption contrast */
 .outlet--primary > small.tw{color:#fff;opacity:1}
 /* police tape: pause on hover/focus */
 .tape:hover .tape__ribbon,.tape:focus-within .tape__ribbon{animation-play-state:paused}
+#tracks,.sheet,#hire,#notes{scroll-margin-top:72px}
