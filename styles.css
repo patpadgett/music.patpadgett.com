@@ -218,7 +218,10 @@ p{margin:0}
 .notes__photo{margin:28px 0 0;max-width:460px;position:relative;transform:rotate(1.2deg)}
 .notes__photo img{border:10px solid #fff;border-bottom-width:34px;box-shadow:var(--shadow-paper)}
 .notes__photo figcaption{position:absolute;left:14px;bottom:8px;font-size:.8rem;color:var(--ink-2)}
-.notes__logo{width:clamp(160px,20vw,260px);mix-blend-mode:multiply;filter:invert(1) contrast(1.1);opacity:.9;margin-top:auto;padding-top:28px;align-self:flex-end}
+.notes__head{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(24px,4vw,64px);align-items:center;margin-bottom:32px}
+.notes__head .notes__title{margin-bottom:0}
+.notes__logo{width:min(100%,clamp(200px,24vw,340px));height:auto;justify-self:end;mix-blend-mode:multiply;filter:invert(1) contrast(1.1);opacity:.9;margin:0}
+@media (max-width:760px){.notes__head{grid-template-columns:1fr}.notes__logo{justify-self:start;width:clamp(180px,48vw,260px);margin:0 0 4px}}
 @media (max-width:760px){.notes__cols{grid-template-columns:1fr}}
 
 /* ---------- police tape → ledakanpemuda.com ---------- */
