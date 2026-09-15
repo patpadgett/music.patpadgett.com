@@ -436,7 +436,7 @@ html.motion-off .reel__cover.is-rewinding img{animation:none}
   .go{display:flex;flex-direction:column;justify-content:center;min-height:64px;padding:12px 16px;border:3px double var(--red);border-radius:6px;color:var(--red);text-decoration:none;font-family:var(--f-tw);font-weight:700;letter-spacing:.14em;line-height:1.1;font-size:1.25rem;transform:rotate(-1.2deg);max-width:100%}
   .go small{display:block;font-weight:400;font-size:.75rem;letter-spacing:.04em;color:var(--ink-2);margin-top:4px}
   .go:focus-visible{outline:2px solid var(--red);outline-offset:3px}
-  .go--book{align-self:flex-start;font-size:.82rem;letter-spacing:.06em;color:var(--ink);text-decoration:none;border-bottom:1.5px solid var(--red);padding:6px 0 3px;min-height:24px}
+  .go--book{align-self:flex-start;font-size:.82rem;letter-spacing:.06em;color:var(--ink);text-decoration:none;padding:12px 0;min-height:44px;display:inline-flex;align-items:center;background:linear-gradient(var(--red),var(--red)) no-repeat 0 calc(50% + .75em)/100% 1.5px}
   .go--book:hover,.go--book:focus-visible{color:var(--red)}
 }
 /* booking: field errors + readable confirmation */
@@ -478,10 +478,11 @@ body.tape-rolling,body.mini-open{padding-bottom:70px}
 .keys{margin-right:0}
 .motion{position:absolute;right:18px;top:44px;margin:0;width:auto;font-size:.72rem;letter-spacing:.1em;color:var(--ink-2);background:none;border:1px solid var(--paper-line);padding:4px 8px;cursor:pointer}
 .motion[aria-pressed="false"]{color:var(--red);border-color:var(--red)}
-.util{display:contents}
+.util{position:absolute;right:18px;top:14px;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.util .keys,.util .motion{position:static;margin:0}
 .sheet{position:relative}
-@media (max-width:560px){.util{margin:10px 18px 0 44px}}
-@media (max-width:560px){.util{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}.util .keys,.util .motion{position:static;margin:0;flex:0 0 auto;width:auto;max-width:100%}}
+
+@media (max-width:560px){.util{position:static;flex-direction:row;flex-wrap:wrap;align-items:stretch;gap:8px;margin:10px 18px 0 44px}.util .keys,.util .motion{flex:0 0 auto;width:auto;max-width:100%}}
 .tracks__hint{font-size:.78rem;color:var(--ink-2);letter-spacing:.06em;padding:8px 18px 4px 44px;margin:0}
 
 @media (max-width:560px){
@@ -511,3 +512,4 @@ body.tape-rolling,body.mini-open{padding-bottom:70px}
 /* P3: utility pills 32px hit area */
 .keys,.motion{min-height:32px}
 .tracks__t .w{white-space:nowrap;display:inline-block}
+@media (max-width:360px){.hire__kind{white-space:nowrap;letter-spacing:.12em}}

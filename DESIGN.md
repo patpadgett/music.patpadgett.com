@@ -52,3 +52,8 @@ Three layers that hand the cover off to each other; never more than one owns it.
 - Session notes text is Patrick's own — leave as written.
 - Mobile hero is **album-first**: one PLAY stamp (full card width, "30-second previews") is the only red action; "Work with me → booking sheet" is a quiet underlined text link beneath it. No second stamp.
 - Fix: at 390px the two-stamp row overflowed the label card by 10px; the single-column stack removes the overflow at every width (checked 320–760).
+
+## Round-7 refinements
+- `.reel__go` precedes `.reel__cat` in DOM (mobile Tab: PLAY → booking → catalogue link).
+- Desktop utilities are one `.util` stack (absolute in the sheet at right:18px/top:14px, 6px gap) — DOM stays after the tracks so keyboard order is tracks first.
+- `.go--book` is a 44px-tall hit area with the same quiet underline; `.hire__kind` stays on one line at 320px.
