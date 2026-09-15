@@ -12,9 +12,10 @@
   const cover = document.querySelector('.reel__cover');
   const img = cover && cover.querySelector('img');
   const stamp = document.getElementById('play-stamp');
+  const audioEl = document.getElementById('preview');
   const sheet = document.querySelector('.sheet');
   const rows = [...document.querySelectorAll('.tracks li')];
-  if (!cover || !img || !stamp || !sheet || !rows.length) return;
+  if (!cover || !img || !stamp || !sheet || !rows.length || !audioEl) return;
 
   /* ============================== C : depth cover ============================== */
   let C = null;
@@ -84,105 +85,113 @@
     (img.complete && img.naturalWidth ? Promise.resolve() : new Promise(r => img.addEventListener('load', r, { once: true }))).then(mount);
   }
 
-  /* ============================== A : the reel rolls =========================== */
-  const A = { on: false, raf: 0, ctx: null, an: null, data: null, vu: null, idx: 0, tick: 0, trackTimer: 0 };
-  const durations = rows.map(li => { const m = (li.querySelector('.tracks__d') || {}).textContent || '0:00'; const [mm, ss] = m.split(':').map(Number); return (mm * 60 + ss) || 180; });
+  /* ============================== A : real transport ============================= */
+  // One <audio> element plays 30-second previews (assets/audio/NN.mp3). Everything visual is
+  // derived from it: reel spins while !paused, VU needles read a real analyser on the element,
+  // the ▶ marker is the track that is actually loaded, ✓ marks tracks that have finished.
+  const audio = document.getElementById('preview');
+  const stampText = stamp.querySelector('.stamp__text');
+  const transport = document.getElementById('transport');
+  const tNow = transport && transport.querySelector('.transport__now');
+  const tTime = transport && transport.querySelector('.transport__time');
+  const titles = rows.map(li => li.querySelector('.tracks__t').textContent);
+  const A = { idx: -1, raf: 0, ctx: null, an: null, data: null, vu: null, wired: false, done: new Set() };
+  const src = i => 'assets/audio/' + String(i + 1).padStart(2, '0') + '.mp3';
+  const fmt = t => Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
+
   function buildVU() {
     const wrap = document.createElement('div'); wrap.className = 'vu'; wrap.setAttribute('aria-hidden', 'true');
     wrap.innerHTML = '<canvas class="vu__c" width="240" height="120"></canvas><canvas class="vu__c" width="240" height="120"></canvas><span class="vu__l tw">L</span><span class="vu__l tw">R</span>';
     sheet.querySelector('.sheet__player').insertAdjacentElement('beforebegin', wrap);
     return wrap;
   }
-  function drawNeedle(c, lvl, t) {
+  function drawNeedle(c, lvl) {
     const x = c.getContext('2d'), W = c.width, H = c.height; x.clearRect(0, 0, W, H);
     x.save(); x.translate(W / 2, H - 10);
-    // scale arc, ticks, red zone
     x.strokeStyle = '#24407a'; x.lineWidth = 1.2; x.beginPath(); x.arc(0, 0, 88, Math.PI * 1.18, Math.PI * 1.82); x.stroke();
     x.strokeStyle = '#c8261e'; x.lineWidth = 3; x.beginPath(); x.arc(0, 0, 88, Math.PI * 1.7, Math.PI * 1.82); x.stroke();
     for (let i = 0; i <= 10; i++) { const a = Math.PI * (1.18 + .64 * i / 10); x.strokeStyle = i >= 8 ? '#c8261e' : '#24407a'; x.lineWidth = i % 5 ? 1 : 2; x.beginPath(); x.moveTo(Math.cos(a) * 80, Math.sin(a) * 80); x.lineTo(Math.cos(a) * 88, Math.sin(a) * 88); x.stroke(); }
     x.font = '10px "Special Elite", monospace'; x.fillStyle = '#4a463f'; x.textAlign = 'center'; x.fillText('VU', 0, -30);
-    // needle with a little overshoot ballistics handled by caller
     const a = Math.PI * (1.18 + .64 * Math.min(1, Math.max(0, lvl)));
     x.strokeStyle = '#171512'; x.lineWidth = 2; x.beginPath(); x.moveTo(0, 0); x.lineTo(Math.cos(a) * 84, Math.sin(a) * 84); x.stroke();
     x.fillStyle = '#171512'; x.beginPath(); x.arc(0, 0, 5, 0, Math.PI * 2); x.fill();
     x.restore();
   }
-  function startAudio() {
-    if (A.ctx) return;
+  function wireAnalyser() {
+    if (A.wired) return; A.wired = true;
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      // tape hiss + a slow "programme" envelope so the needles breathe like a real master, mixed to a muted gain: analyser only, nothing audible.
-      const noise = ctx.createBufferSource(); const buf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate); const d = buf.getChannelData(0);
-      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * .6; noise.buffer = buf; noise.loop = true;
-      const lfo = ctx.createOscillator(); lfo.frequency.value = 0.9; const lfoG = ctx.createGain(); lfoG.gain.value = .35;
-      const lfo2 = ctx.createOscillator(); lfo2.frequency.value = 2.3; const lfo2G = ctx.createGain(); lfo2G.gain.value = .2;
-      const env = ctx.createGain(); env.gain.value = .5; lfo.connect(lfoG).connect(env.gain); lfo2.connect(lfo2G).connect(env.gain);
-      const an = ctx.createAnalyser(); an.fftSize = 256; an.smoothingTimeConstant = .6;
-      const mute = ctx.createGain(); mute.gain.value = 0;
-      noise.connect(env).connect(an).connect(mute).connect(ctx.destination);
-      noise.start(); lfo.start(); lfo2.start();
-      A.ctx = ctx; A.an = an; A.data = new Uint8Array(an.frequencyBinCount);
-    } catch (e) { A.ctx = null; }
+      const node = ctx.createMediaElementSource(audio);
+      const an = ctx.createAnalyser(); an.fftSize = 512; an.smoothingTimeConstant = .5;
+      node.connect(an).connect(ctx.destination);
+      A.ctx = ctx; A.an = an; A.data = new Uint8Array(an.fftSize);
+    } catch (e) { /* no analyser: needles rest, audio still plays through the element */ }
   }
   let vuL = 0, vuR = 0;
-  function reelFrame(now) {
-    A.raf = 0; if (!A.on) return;
-    let lvl = .35 + .25 * Math.sin(now / 700) * Math.sin(now / 1900);
-    if (A.an) { A.an.getByteTimeDomainData(A.data); let s = 0; for (let i = 0; i < A.data.length; i++) { const v = (A.data[i] - 128) / 128; s += v * v; } lvl = Math.min(1, Math.sqrt(s / A.data.length) * 2.6); }
-    vuL += (lvl - vuL) * .18; vuR += ((lvl * .92 + .03 * Math.sin(now / 300)) - vuR) * .16;
-    const cs = A.vu.querySelectorAll('canvas'); drawNeedle(cs[0], vuL, now); drawNeedle(cs[1], vuR, now);
-    A.raf = requestAnimationFrame(reelFrame);
+  function frame() {
+    A.raf = 0;
+    if (audio.paused) { if (A.vu) { const cs = A.vu.querySelectorAll('canvas'); vuL *= .8; vuR *= .8; drawNeedle(cs[0], vuL); drawNeedle(cs[1], vuR); if (vuL > .01) A.raf = requestAnimationFrame(frame); } return; }
+    let lvl = 0;
+    if (A.an) { A.an.getByteTimeDomainData(A.data); let s = 0; for (let i = 0; i < A.data.length; i++) { const v = (A.data[i] - 128) / 128; s += v * v; } lvl = Math.min(1, Math.sqrt(s / A.data.length) * 3.2); }
+    vuL += (lvl - vuL) * .25; vuR += ((lvl * .95) - vuR) * .22;
+    if (!reduce && A.vu) { const cs = A.vu.querySelectorAll('canvas'); drawNeedle(cs[0], vuL); drawNeedle(cs[1], vuR); }
+    if (tTime) tTime.textContent = fmt(audio.currentTime) + ' / 0:30';
+    A.raf = requestAnimationFrame(frame);
   }
-  function setPlaying(i) {
-    rows.forEach((li, k) => { li.classList.toggle('is-playing', k === i); li.classList.toggle('is-ticked', k < i); });
-    A.idx = i;
-    clearTimeout(A.trackTimer);
-    if (i < rows.length) A.trackTimer = setTimeout(() => setPlaying(i + 1), durations[i] * 1000);
-    else { A.trackTimer = setTimeout(stopReel, 400); }
+  function mark() {
+    rows.forEach((li, k) => { li.classList.toggle('is-playing', k === A.idx); li.classList.toggle('is-ticked', A.done.has(k) && k !== A.idx); li.setAttribute('aria-pressed', String(k === A.idx && !audio.paused)); });
   }
-  function startReel(fromIdx = 0) {
-    if (reduce) { setPlaying(fromIdx); return; }
-    if (!A.vu) A.vu = buildVU();
-    if (C) C.disable();
-    cover.classList.add('is-rolling'); document.body.classList.add('tape-rolling');
-    startAudio(); A.on = true; if (!A.raf) A.raf = requestAnimationFrame(reelFrame);
-    setPlaying(fromIdx);
+  function setStamp() {
+    const playing = !audio.paused;
+    stamp.setAttribute('aria-pressed', String(playing));
+    stamp.setAttribute('aria-label', playing ? 'Pause preview' : (A.idx < 0 ? 'Play 30-second previews, from track 1' : 'Resume preview of ' + titles[A.idx]));
+    stampText.innerHTML = playing ? 'PAUSE<br>MASTER' : 'PLAY<br>MASTER';
+    cover.classList.toggle('is-rolling', playing && !reduce); document.body.classList.toggle('tape-rolling', playing);
+    if (playing) { if (C) C.disable(); if (!A.vu && !reduce) A.vu = buildVU(); if (!A.raf) A.raf = requestAnimationFrame(frame); }
+    else if (C && !reduce && !document.body.classList.contains('tape-rolling')) C.enable();
+    if (tNow) tNow.textContent = A.idx < 0 ? '30-second previews · press a track or the stamp' : (playing ? '▶ ' : '❚❚ ') + String(A.idx + 1).padStart(2, '0') + ' ' + titles[A.idx] + ' · preview';
   }
-  function stopReel() {
-    A.on = false; if (A.raf) cancelAnimationFrame(A.raf); A.raf = 0; clearTimeout(A.trackTimer);
-    cover.classList.remove('is-rolling'); document.body.classList.remove('tape-rolling');
-    rows.forEach(li => li.classList.remove('is-playing', 'is-ticked'));
-    if (A.ctx) { A.ctx.suspend(); }
-    if (C && !reduce) C.enable();
+  function load(i) {
+    A.idx = i; audio.preload = 'auto'; audio.src = src(i); audio.load(); mark();
   }
-  // hub + flange DOM for the reel (cover becomes the reel when rolling)
+  function play(i) {
+    if (i !== undefined && i !== A.idx) load(i);
+    else if (A.idx < 0) load(0);
+    wireAnalyser(); if (A.ctx && A.ctx.state === 'suspended') A.ctx.resume();
+    const p = audio.play(); if (p && p.catch) p.catch(() => { if (tNow) tNow.textContent = 'Preview could not start — tap again, or use the Bandcamp player below.'; setStamp(); });
+  }
+  audio.addEventListener('play', () => { setStamp(); mark(); });
+  audio.addEventListener('pause', () => { if (A.finished) { A.finished = false; return; } setStamp(); mark(); });
+  audio.addEventListener('ended', () => { A.done.add(A.idx); if (A.idx + 1 < rows.length) play(A.idx + 1); else { A.finished = true; A.idx = -1; mark(); setStamp(); if (tNow) tNow.textContent = 'End of previews · full album on Bandcamp below'; if (tTime) tTime.textContent = ''; } });
+  audio.addEventListener('timeupdate', () => { if (!audio.paused && audio.duration && audio.currentTime >= audio.duration - 0.05) { audio.pause(); audio.dispatchEvent(new Event('ended')); } });
+  audio.addEventListener('error', () => { if (tNow) tNow.textContent = 'Preview ' + String(A.idx + 1).padStart(2, '0') + ' is unavailable — full album on Bandcamp below.'; });
+  stamp.addEventListener('click', () => { if (audio.paused) play(); else audio.pause(); });
+  addEventListener('keydown', e => { if (e.key === ' ' && !e.target.closest('input,textarea,button,a,select,[role=button],iframe')) { e.preventDefault(); if (audio.paused) play(); else audio.pause(); } });
   const hub = document.createElement('div'); hub.className = 'reel__hub'; hub.setAttribute('aria-hidden', 'true');
   hub.innerHTML = '<span></span><span></span><span></span>'; cover.appendChild(hub);
-  stamp.addEventListener('click', () => { setTimeout(() => { const open = stamp.getAttribute('aria-expanded') === 'true'; if (open) { if (A.ctx) A.ctx.resume(); startReel(A.idx < rows.length ? A.idx : 0); } else stopReel(); }, 0); });
+  // mobile LISTEN stamp starts playing too (it's a link to #tracks; enhance in place)
+  const goListen = document.querySelector('.go--listen'); if (goListen) goListen.addEventListener('click', () => { if (audio.paused) play(A.idx < 0 ? 0 : A.idx); });
 
   /* ============================== B : the sheet is the instrument ============== */
   const beep = { on: false, ctx: null };
   function click(ctx) { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'square'; o.frequency.value = 1800 + Math.random() * 300; g.gain.setValueAtTime(.05, ctx.currentTime); g.gain.exponentialRampToValueAtTime(.0005, ctx.currentTime + .045); o.connect(g).connect(ctx.destination); o.start(); o.stop(ctx.currentTime + .05); }
-  // opt-in toggle, muted default, lives in the sheet head
   const head = sheet.querySelector('.sheet__head');
   const tog = document.createElement('button'); tog.type = 'button'; tog.className = 'keys tw'; tog.setAttribute('aria-pressed', 'false'); tog.textContent = 'KEY CLICKS: OFF';
   tog.addEventListener('click', () => { beep.on = !beep.on; tog.setAttribute('aria-pressed', String(beep.on)); tog.textContent = 'KEY CLICKS: ' + (beep.on ? 'ON' : 'OFF'); if (beep.on && !beep.ctx) { try { beep.ctx = new (window.AudioContext || window.webkitAudioContext)(); click(beep.ctx); } catch (e) { beep.on = false; } } });
   head.appendChild(tog);
   const carriage = document.createElement('span'); carriage.className = 'carriage'; carriage.setAttribute('aria-hidden', 'true'); sheet.querySelector('.tracks').appendChild(carriage);
   rows.forEach((li, i) => {
-    li.tabIndex = 0; li.setAttribute('role', 'button'); li.setAttribute('aria-label', 'Play track ' + (i + 1) + ': ' + li.querySelector('.tracks__t').textContent);
+    li.tabIndex = 0; li.setAttribute('role', 'button'); li.setAttribute('aria-pressed', 'false');
+    li.setAttribute('aria-label', 'Preview track ' + (i + 1) + ', ' + titles[i] + ', 30 seconds');
     const t = li.querySelector('.tracks__t'); const text = t.textContent;
     t.innerHTML = [...text].map(ch => `<span class="g">${ch === ' ' ? '&nbsp;' : ch}</span>`).join('');
-    li.addEventListener('pointerenter', e => { if (reduce) return; const r = li.getBoundingClientRect(), pr = li.parentElement.getBoundingClientRect(); carriage.style.top = (r.top - pr.top) + 'px'; carriage.style.height = r.height + 'px'; carriage.classList.add('is-on'); });
+    li.addEventListener('pointerenter', () => { if (reduce) return; const r = li.getBoundingClientRect(), pr = li.parentElement.getBoundingClientRect(); carriage.style.top = (r.top - pr.top) + 'px'; carriage.style.height = r.height + 'px'; carriage.classList.add('is-on'); });
     li.addEventListener('pointermove', e => { if (reduce) return; const pr = li.parentElement.getBoundingClientRect(); carriage.style.setProperty('--x', Math.max(30, e.clientX - pr.left) + 'px'); });
     li.addEventListener('pointerleave', () => carriage.classList.remove('is-on'));
     const strike = () => {
       const gs = t.querySelectorAll('.g'); gs.forEach(g => g.classList.remove('hit'));
       if (!reduce) gs.forEach((g, k) => setTimeout(() => { g.classList.add('hit'); if (beep.on && beep.ctx) click(beep.ctx); }, k * 38));
-      // open the player at this row: reuse the existing stamp behaviour, then mark the row
-      const open = stamp.getAttribute('aria-expanded') === 'true';
-      if (!open) stamp.click();
-      setTimeout(() => { if (A.on || reduce) setPlaying(i); else startReel(i); }, open ? 0 : 60);
+      if (A.idx === i && !audio.paused) audio.pause(); else play(i);
     };
     li.addEventListener('click', e => { if (e.target.closest('a')) return; strike(); });
     li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); strike(); } });

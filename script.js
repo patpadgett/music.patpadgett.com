@@ -8,34 +8,19 @@
   });
 
   // PLAY MASTER stamp: reveal the Bandcamp player, load iframe lazily
-  var stamp = document.getElementById('play-stamp');
+  var bcToggle = document.getElementById('bc-toggle');
   var player = document.getElementById('bc-player');
-  if (stamp && player) {
-    var frame = player.querySelector('iframe');
-    stamp.addEventListener('click', function () {
-      var open = stamp.getAttribute('aria-expanded') === 'true';
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (bcToggle && player) {
+    bcToggle.addEventListener('click', function () {
+      var open = bcToggle.getAttribute('aria-expanded') === 'true';
       if (!open) {
-        if (frame && !frame.src) frame.src = frame.getAttribute('data-src');
-        player.hidden = false;
-        stamp.setAttribute('aria-expanded', 'true');
-        stamp.querySelector('.stamp__text').innerHTML = 'HIDE<br>PLAYER';
-        if (player.getBoundingClientRect().bottom > innerHeight) player.scrollIntoView({ behavior: 'smooth', block: 'end' });
-      } else {
-        player.hidden = true;
-        stamp.setAttribute('aria-expanded', 'false');
-        stamp.querySelector('.stamp__text').innerHTML = 'PLAY<br>MASTER';
-      }
+        var f = player.querySelector('iframe'); if (f && !f.src) f.src = f.getAttribute('data-src');
+        player.hidden = false; bcToggle.setAttribute('aria-expanded', 'true'); bcToggle.textContent = 'Full album ▴ (hide player)';
+        if (player.getBoundingClientRect().bottom > innerHeight) player.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'end' });
+      } else { player.hidden = true; bcToggle.setAttribute('aria-expanded', 'false'); bcToggle.textContent = 'Full album ▾ (embedded player)'; }
     });
   }
-
-  // clicking a track row opens the player (Bandcamp embed handles track selection itself)
-  document.querySelectorAll('.tracks li').forEach(function (li) {
-    li.addEventListener('click', function () {
-      if (stamp && stamp.getAttribute('aria-expanded') !== 'true') stamp.click();
-      document.querySelectorAll('.tracks li').forEach(function (x) { x.classList.remove('is-playing'); });
-      li.classList.add('is-playing');
-    });
-  });
 
   // nav: mark the section in view
   var links = [].slice.call(document.querySelectorAll('.spine__nav a'));
@@ -78,24 +63,33 @@
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       status.classList.remove('is-error');
-      if (!form.checkValidity()) {
-        status.textContent = 'Name, email and a note about the project are needed.';
-        status.classList.add('is-error');
-        var bad = form.querySelector(':invalid');
-        if (bad) bad.focus();
-        return;
+      if (form.dataset.busy === '1') return;
+      var msgs = { 'f-name': 'Your name, so I know who to write back to.', 'f-email': 'A working email address — that is where the reply goes.', 'f-msg': 'A line or two about the project.' };
+      var firstBad = null, n = 0;
+      ['f-name', 'f-email', 'f-msg'].forEach(function (id) {
+        var el = document.getElementById(id), err = document.getElementById(id + '-err'); if (!el || !err) return;
+        var bad = !el.checkValidity();
+        el.setAttribute('aria-invalid', bad ? 'true' : 'false'); err.hidden = !bad; err.textContent = bad ? (el.validity.typeMismatch ? 'That does not look like an email address.' : msgs[id]) : '';
+        if (bad) { n++; if (!firstBad) firstBad = el; }
+      });
+      if (firstBad) {
+        status.textContent = n === 1 ? 'One field needs attention.' : n + ' fields need attention.';
+        status.classList.add('is-error'); firstBad.focus(); return;
       }
+      form.dataset.busy = '1'; var btn = form.querySelector('.stamp--submit'); if (btn) btn.disabled = true;
       var data = new FormData(form);
       status.textContent = 'Sending…';
       fetch(form.action, { method: 'POST', body: data })
         .then(function (r) { if (!r.ok) throw new Error(r.status); return r; })
         .then(function () {
-          status.textContent = 'Got it. I will write back to ' + data.get('email') + ' within two days.';
+          status.textContent = '';
+          var done = form.querySelector('.booking__done'); if (done) { done.hidden = false; done.textContent = 'Got it. I will write back to ' + data.get('email') + ' within two days.'; done.setAttribute('tabindex', '-1'); done.focus(); }
           markReceived();
         })
         .catch(function () {
           // endpoint not live yet: hand off to email with the fields prefilled
           var body = 'Name: ' + data.get('name') + '\nEmail: ' + data.get('email') + '\nType: ' + data.get('type') + '\n\n' + data.get('message');
+          form.dataset.busy = ''; if (btn) btn.disabled = false;
           status.textContent = 'Opening your mail app instead…';
           window.location.href = 'mailto:pat@patpadgett.com?subject=' + encodeURIComponent('Booking: ' + data.get('type')) + '&body=' + encodeURIComponent(body);
         });

@@ -56,6 +56,7 @@
       <p class="tw">REEL 01 &nbsp;·&nbsp; MASTER</p>
       <h1 class="reel__title" id="korupsi-title"><span class="reel__artist">Ledakan Pemuda</span><span class="reel__album">Korupsi</span></h1>
       <p class="reel__cat tw"><b>LP–001</b>Jakarta → USA<br>2019 → 2025<br>Debut LP · digital<br><a href="https://ledakanpemuda.com/">ledakanpemuda.com ↗</a></p>
+      <p class="reel__go" aria-label="Shortcuts"><a class="go go--listen" href="#tracks">LISTEN<small>30 s previews</small></a><a class="go go--book" href="#hire">WORK<br>WITH ME<small>booking sheet</small></a></p>
       <dl class="reel__meta tw">
         <div><dt>Recorded</dt><dd>Jakarta, 2019</dd></div>
         <div><dt>Mixed &amp; finished</dt><dd>USA, 2019–2025</dd></div>
@@ -73,7 +74,7 @@
       <p class="tw sheet__eng">Producer / music / lyrics: <b>Patrick Padgett</b></p>
     </div>
 
-    <ol class="tracks" aria-label="Korupsi track list">
+    <ol class="tracks" id="tracks" aria-label="Korupsi track list — 30-second previews">
       <li><span class="tracks__n">01</span><span class="tracks__t" lang="id">Pengantar</span><span class="tracks__note tw">instrumental · intro</span><span class="tracks__d">2:39</span></li>
       <li><span class="tracks__n">02</span><span class="tracks__t" lang="id">Tulisan Darah</span><span class="tracks__note tw"></span><span class="tracks__d">3:19</span></li>
       <li><span class="tracks__n">03</span><span class="tracks__t" lang="id">Penjaga Roh</span><span class="tracks__note tw"></span><span class="tracks__d">2:53</span></li>
@@ -88,10 +89,14 @@
     </ol>
 
     <div class="sheet__player">
-      <button class="stamp" type="button" id="play-stamp" aria-controls="bc-player" aria-expanded="false">
+      <button class="stamp" type="button" id="play-stamp" aria-pressed="false" aria-label="Play 30-second previews, from track 1">
         <span class="stamp__ring"></span>
         <span class="stamp__text">PLAY<br>MASTER</span>
       </button>
+      <div class="transport tw" id="transport" aria-live="polite" aria-atomic="true"><span class="transport__now">30-second previews · press a track or the stamp</span><span class="transport__time"></span></div>
+      <audio id="preview" preload="none"></audio>
+      <noscript><p class="tw player__fallback">Previews need JavaScript. <a href="https://ledakanpemuda.bandcamp.com/album/korupsi">Listen on Bandcamp ↗</a></p></noscript>
+      <button class="tw player__toggle" type="button" id="bc-toggle" aria-controls="bc-player" aria-expanded="false">Full album ▾ (embedded player)</button>
       <div class="player" id="bc-player" hidden>
         <iframe title="Korupsi by Ledakan Pemuda — Bandcamp player"
                 data-src="https://bandcamp.com/EmbeddedPlayer/album=4077483661/size=large/bgcol=111111/linkcol=c8261e/tracklist=true/artwork=none/transparent=true/"
@@ -175,17 +180,18 @@
   <div class="hire__paper">
     <p class="tw hire__kind">BOOKING SHEET</p>
     <h2 id="hire-title">Send me the rough tracks.</h2>
-    <p class="hire__lede">Production, mixing, session bass, or a collaboration. Tell me what you have and what you want it to sound like. Links to rough mixes help.</p>
+    <p class="hire__lede">Production, mixing, session bass, or a collaboration. Tell me what you have and what you want it to sound like. Links to rough mixes help. <b class="hire__promise">I reply within 48 hours.</b></p>
 
     <form class="booking" action="/api/booking" method="post" novalidate>
       <div class="received" aria-hidden="true" hidden><b>Received</b><span class="received__d"></span><span>Reply in 48 h · Tampa</span></div>
+      <p class="booking__done tw" hidden></p>
       <div class="field">
         <label for="f-name">Name</label>
-        <input id="f-name" name="name" type="text" autocomplete="name" required>
+        <input id="f-name" aria-describedby="f-name-err" name="name" type="text" autocomplete="name" required><span class="field__err tw" id="f-name-err" hidden></span>
       </div>
       <div class="field">
         <label for="f-email">Email</label>
-        <input id="f-email" name="email" type="email" autocomplete="email" required>
+        <input id="f-email" aria-describedby="f-email-err" name="email" type="email" autocomplete="email" required><span class="field__err tw" id="f-email-err" hidden></span>
       </div>
       <fieldset class="field field--radio">
         <legend>What is it</legend>
@@ -197,7 +203,7 @@
       </fieldset>
       <div class="field field--wide">
         <label for="f-msg">The project</label>
-        <textarea id="f-msg" name="message" rows="5" required placeholder="What it is, where it's at, what it should sound like. Paste links."></textarea>
+        <textarea id="f-msg" aria-describedby="f-msg-err" name="message" rows="5" required placeholder="What it is, where it's at, what it should sound like. Paste links."></textarea><span class="field__err tw" id="f-msg-err" hidden></span>
       </div>
       <input type="hidden" name="source" value="music.patpadgett.com">
       <div class="field field--submit">

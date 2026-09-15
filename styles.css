@@ -184,7 +184,7 @@ p{margin:0}
   .reel__label{margin-left:12px;margin-right:12px;margin-top:-40px;grid-template-columns:1fr;grid-template-areas:'k' 'title' 'cat' 'meta'}
   .reel__cat{justify-self:start;text-align:left;margin:0 0 12px}
   .reel__meta{grid-template-columns:1fr}
-  .reel__note{position:static;transform:rotate(-2deg);display:block;margin:18px 0 0 12px;max-width:none;font-size:1.35rem}
+  .reel__note{position:static;transform:rotate(-2deg);display:block;margin:18px 0 0 12px;max-width:none;font-size:1.35rem;color:var(--ink);text-shadow:none}
   .tracks li{grid-template-columns:36px 1fr 52px}
   .tracks__note{display:none}
   .sheet__player{grid-template-columns:1fr;justify-items:start}
@@ -398,8 +398,48 @@ p{margin:0}
 .foot{position:relative}
 .leader{width:100%;display:flex;align-items:center;gap:14px;margin-top:10px;font-size:.78rem;letter-spacing:.14em;color:var(--paper);opacity:.8;text-transform:uppercase;background:none;border:0;cursor:pointer;font-family:var(--f-tw);padding:8px 0;text-align:left}
 .leader::before,.leader::after{content:"";flex:1;height:6px;background:repeating-linear-gradient(90deg,var(--paper) 0 18px,transparent 18px 26px);opacity:.35}
-.leader:hover,.leader:focus-visible{opacity:1;outline:none}
+.leader:hover{opacity:1}.leader:focus-visible{opacity:1;outline:2px solid var(--paper);outline-offset:4px}
 .leader:hover::before,.leader:hover::after{animation:leaderRun .9s linear infinite reverse}
 @keyframes leaderRun{to{background-position:26px 0}}
 .reel__cover.is-rewinding img,.reel__cover.is-rewinding .reel__hub{animation-direction:reverse;animation-duration:.6s}
 @media (prefers-reduced-motion:reduce){.leader:hover::before,.leader:hover::after{animation:none}}
+
+/* ---------- critique fix round ---------- */
+/* transport */
+.transport{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px;font-size:.8rem;color:var(--ink-2);letter-spacing:.06em;margin:-4px 0 0;min-height:1.3em}
+.transport__time{font-variant-numeric:tabular-nums;color:var(--red)}
+.player__toggle{grid-column:1/-1;display:inline-block;justify-self:start;text-align:left;background:none;border:0;border-bottom:1.5px solid var(--red);color:var(--ink);font-size:.82rem;letter-spacing:.04em;padding:6px 0 4px;margin:0 0 6px;cursor:pointer;min-height:24px}
+.player__toggle:hover{color:var(--red)}
+.player__toggle:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+#preview{display:none}.sheet__player .player{grid-column:1/-1}.sheet__player{grid-template-areas:none}
+.stamp[aria-pressed="true"] .stamp__ring{border-style:solid}
+/* rows: 44px min, state via aria-pressed too */
+.tracks li{min-height:44px;align-items:center}
+/* mobile shortcut stamps */
+.reel__go{display:none}
+@media (max-width:760px){
+  .reel__go{display:flex;gap:14px;margin:14px 0 4px;order:-1}
+  .reel__label{grid-template-areas:'k' 'title' 'cat' 'go' 'meta' 'note' !important}.reel__go{grid-area:go}
+  .go{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:64px;padding:10px 14px;border:3px double var(--red);border-radius:6px;color:var(--red);text-decoration:none;font-family:var(--f-tw);font-weight:700;letter-spacing:.12em;line-height:1.1;font-size:1.05rem;transform:rotate(-1.5deg)}
+  .go--book{transform:rotate(1.2deg)}
+  .go small{display:block;font-weight:400;font-size:.75rem;letter-spacing:.04em;color:var(--ink-2);margin-top:4px}
+  .go:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+}
+/* booking: field errors + readable confirmation */
+.field__err{display:block;color:var(--red);font-size:.8rem;margin-top:4px}
+.field__err[hidden]{display:none}
+.booking [aria-invalid="true"]{border-bottom-color:var(--red)}
+.booking__done{grid-column:1/-1;font-size:.95rem;color:var(--ink);margin:0;padding:10px 0 0;border-top:1px solid var(--paper-line)}
+.booking__done[hidden]{display:none}
+.booking__done:focus{outline:none}
+.booking.is-sent .booking__done{opacity:1;filter:none}
+.stamp--submit:disabled{opacity:.35;cursor:default;pointer-events:none}
+.hire__promise{font-weight:700;color:var(--ink)}
+/* small targets → 24px min */
+.reel__cat a,.scene__tag a,.booking__alt a,.foot > p a{display:inline-block;padding:5px 0;line-height:14px}
+.booking fieldset label{min-height:24px;display:inline-flex;align-items:center;gap:6px}
+.booking input[type=radio]{width:20px;height:20px;margin:2px}
+/* outlet caption contrast */
+.outlet--primary > small.tw{color:#fff;opacity:1}
+/* police tape: pause on hover/focus */
+.tape:hover .tape__ribbon,.tape:focus-within .tape__ribbon{animation-play-state:paused}
