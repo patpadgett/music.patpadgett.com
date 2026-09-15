@@ -210,12 +210,13 @@ p{margin:0}
 .notes__title{font-size:clamp(2.4rem,5.6vw,5.2rem);text-transform:uppercase;font-weight:900;max-width:16ch;margin-bottom:32px;background:var(--paper-2);display:inline-block;padding:4px 0}
 .notes__cols{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(24px,4vw,64px);align-items:stretch}
 .notes__col{display:flex;flex-direction:column;min-height:100%}
-.notes__col p{max-width:60ch;margin-bottom:32px;color:var(--ink);font-size:1.0625rem;line-height:32px}
+.notes__col cite{font-style:italic}.notes__col q{font-style:italic;quotes:"“" "”"}
+.notes__col p{max-width:60ch;margin-bottom:32px}.notes__col p:last-child{margin-bottom:0}.notes__col p{color:var(--ink);font-size:1.0625rem;line-height:32px}
 .lyric{margin:0;padding:18px 22px 20px;border:2px solid var(--rule);background:var(--paper);position:relative;box-shadow:3px 4px 0 rgba(43,76,155,.15)}
 .lyric p{font-family:var(--f-tw);font-size:clamp(1.05rem,1.6vw,1.3rem);line-height:1.45;color:var(--ink);margin-bottom:12px}
 .lyric footer{font-size:.9rem;color:var(--ink-2);line-height:1.5}
 .lyric .pencil{color:var(--red-2);font-size:1rem}
-.notes__photo{margin:28px 0 0;max-width:460px;position:relative;transform:rotate(1.2deg)}
+.notes__photo{margin:32px 0 0;max-width:460px;position:relative;transform:rotate(1.2deg)}
 .notes__photo img{border:10px solid #fff;border-bottom-width:34px;box-shadow:var(--shadow-paper)}
 .notes__photo figcaption{position:absolute;left:14px;bottom:8px;font-size:.8rem;color:var(--ink-2)}
 .notes__head{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(24px,4vw,64px);align-items:center;margin-bottom:32px}
