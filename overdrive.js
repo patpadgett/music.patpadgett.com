@@ -150,12 +150,13 @@
     if (playing) { if (C) C.disable(); if (!A.vu && !reduce) A.vu = buildVU(); if (!A.raf) A.raf = requestAnimationFrame(frame); }
     else if (C && !reduce && !document.documentElement.classList.contains('motion-off')) C.enable();
     if (tNow) tNow.textContent = A.idx < 0 ? '30-second previews · press a track or the stamp' : (playing ? '▶ ' : '❚❚ ') + String(A.idx + 1).padStart(2, '0') + ' ' + titles[A.idx] + ' · preview';
-    if (mini) { mini.classList.toggle('is-on', playing); if (miniNow && A.idx >= 0) miniNow.textContent = String(A.idx + 1).padStart(2, '0') + ' ' + titles[A.idx]; if (miniBtn) { miniBtn.textContent = playing ? '❚❚' : '▶'; miniBtn.setAttribute('aria-label', playing ? 'Pause preview' : 'Resume preview'); } }
+    if (mini) { mini.classList.toggle('is-on', A.idx >= 0 && !A.dismissed); document.body.classList.toggle('mini-open', A.idx >= 0 && !A.dismissed); mini.classList.toggle('is-paused', !playing); if (miniNow && A.idx >= 0) miniNow.textContent = String(A.idx + 1).padStart(2, '0') + ' ' + titles[A.idx]; if (miniBtn) { miniBtn.textContent = playing ? '❚❚' : '▶'; miniBtn.setAttribute('aria-label', playing ? 'Pause preview' : 'Resume preview'); } }
   }
   function load(i) {
     A.idx = i; audio.preload = 'auto'; audio.src = src(i); audio.load(); mark();
   }
   function play(i) {
+    A.dismissed = false;
     if (i !== undefined && i !== A.idx) load(i);
     else if (A.idx < 0) load(0);
     wireAnalyser(); if (A.ctx && A.ctx.state === 'suspended') A.ctx.resume();
@@ -168,11 +169,16 @@
   audio.addEventListener('error', () => { if (tNow) tNow.textContent = 'Preview ' + String(A.idx + 1).padStart(2, '0') + ' is unavailable — full album on Bandcamp below.'; });
   stamp.addEventListener('click', () => { if (audio.paused) play(); else audio.pause(); });
   if (miniBtn) miniBtn.addEventListener('click', () => { if (audio.paused) play(); else audio.pause(); });
+  const miniX = document.getElementById('mini-x');
+  if (miniX) miniX.addEventListener('click', () => { audio.pause(); A.dismissed = true; mini.classList.remove('is-on'); document.body.classList.remove('tape-rolling'); stamp.focus(); });
+  // handoff: opening the full Bandcamp player pauses the preview
+  const bcT = document.getElementById('bc-toggle'); if (bcT) bcT.addEventListener('click', () => { if (!audio.paused) audio.pause(); }, true);
+  const util = document.createElement('div'); util.className = 'util'; sheet.querySelector('.sheet__head').appendChild(util);
   // motion toggle (persisted) — ambient motion off: tape, depth cover, reel spin
   const motionKey = 'lp-motion';
-  const setMotion = on => { document.documentElement.classList.toggle('motion-off', !on); try { localStorage.setItem(motionKey, on ? 'on' : 'off'); } catch (e) {} if (C) { if (on && !reduce && audio.paused) C.enable(); else C.disable(); } mtog.setAttribute('aria-pressed', String(on)); mtog.textContent = 'MOTION: ' + (on ? 'ON' : 'OFF'); };
+  const setMotion = on => { document.documentElement.classList.toggle('motion-off', !on); try { localStorage.setItem(motionKey, on ? 'on' : 'off'); } catch (e) {} if (C) { if (on && !reduce && audio.paused) C.enable(); else C.disable(); } mtog.setAttribute('aria-pressed', String(on)); mtog.textContent = 'MOTION: ' + (on ? (reduce ? 'OFF (system)' : 'ON') : 'OFF'); };
   const mtog = document.createElement('button'); mtog.type = 'button'; mtog.className = 'motion tw';
-  sheet.querySelector('.sheet__head').appendChild(mtog);
+  util.appendChild(mtog);
   let motionOn = true; try { motionOn = localStorage.getItem(motionKey) !== 'off'; } catch (e) {}
   mtog.addEventListener('click', () => setMotion(document.documentElement.classList.contains('motion-off')));
   queueMicrotask(() => setMotion(motionOn));
@@ -188,7 +194,7 @@
   const head = sheet.querySelector('.sheet__head');
   const tog = document.createElement('button'); tog.type = 'button'; tog.className = 'keys tw'; tog.setAttribute('aria-pressed', 'false'); tog.textContent = 'KEY CLICKS: OFF';
   tog.addEventListener('click', () => { beep.on = !beep.on; tog.setAttribute('aria-pressed', String(beep.on)); tog.textContent = 'KEY CLICKS: ' + (beep.on ? 'ON' : 'OFF'); if (beep.on && !beep.ctx) { try { beep.ctx = new (window.AudioContext || window.webkitAudioContext)(); click(beep.ctx); } catch (e) { beep.on = false; } } });
-  head.appendChild(tog);
+  util.insertBefore(tog, util.firstChild);
   const carriage = document.createElement('span'); carriage.className = 'carriage'; carriage.setAttribute('aria-hidden', 'true'); sheet.querySelector('.tracks').appendChild(carriage);
   rows.forEach((li, i) => {
     li.tabIndex = 0; li.setAttribute('role', 'button'); li.setAttribute('aria-pressed', 'false');
