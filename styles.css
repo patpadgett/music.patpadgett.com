@@ -74,7 +74,7 @@ p{margin:0}
 .spine__sep{width:26px;height:1px;background:var(--paper);opacity:.5}
 .spine__sub{color:#ff5a4f}
 .spine__nav{margin-left:auto;display:flex;gap:clamp(12px,2.2vw,28px)}
-.spine__nav a{text-decoration:none;color:var(--paper);opacity:.75;transition:opacity .2s}
+.spine__nav a{text-decoration:none;color:var(--paper);opacity:.75;transition:opacity .2s;display:inline-block;padding:6px 0;min-height:24px}
 .spine__nav a.is-active{opacity:1;color:#ff5a4f}
 .spine__nav a:hover{opacity:1;text-decoration:underline;text-underline-offset:5px;text-decoration-color:var(--red)}
 @media (max-width:760px){.spine__nav{display:none}}
@@ -336,6 +336,6 @@ p{margin:0}
 /* outlet strip on the sheet's bottom edge */
 .sheet__outlets{list-style:none;margin:0;padding:12px 22px 0 44px;display:flex;flex-wrap:wrap;gap:6px 14px;border-top:2px solid var(--rule);background:var(--paper)}
 .sheet__outlets li{font-size:.82rem}
-.sheet__outlets a{color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--paper-line);padding-bottom:1px}
+.sheet__outlets a{color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--paper-line);padding:6px 2px;display:inline-block;min-height:24px}
 .sheet__outlets a:hover{color:var(--red);border-color:var(--red)}
 .sheet__outlets li:first-child a{color:var(--ink);border-color:var(--red)}
