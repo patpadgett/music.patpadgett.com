@@ -57,3 +57,7 @@ Three layers that hand the cover off to each other; never more than one owns it.
 - `.reel__go` precedes `.reel__cat` in DOM (mobile Tab: PLAY → booking → catalogue link).
 - Desktop utilities are one `.util` stack (absolute in the sheet at right:18px/top:14px, 6px gap) — DOM stays after the tracks so keyboard order is tracks first.
 - `.go--book` is a 44px-tall hit area with the same quiet underline; `.hire__kind` stays on one line at 320px.
+
+## Round-8 refinements
+- `.go--book` uses a native text-decoration underline (red, 1.5px, offset 4px) so wrapped lines each carry their own rule; 44px hit area kept.
+- Mobile police-tape URL segments 19px (bold) — clears the 18.67px bold large-text threshold at 3.43:1.
