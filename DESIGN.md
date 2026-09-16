@@ -61,3 +61,7 @@ Three layers that hand the cover off to each other; never more than one owns it.
 ## Round-8 refinements
 - `.go--book` uses a native text-decoration underline (red, 1.5px, offset 4px) so wrapped lines each carry their own rule; 44px hit area kept.
 - Mobile police-tape URL segments 19px (bold) — clears the 18.67px bold large-text threshold at 3.43:1.
+
+## Round-9 refinements
+- Outlet cards fill their grid cell (`li{display:grid}` + `.outlet{height:100%}`); Bandcamp no longer spans the row, so every row's bottom edges are level.
+- Police-tape URL 19px bold up to 1000px (768px had landed 0.24px under the bold large-text threshold).
